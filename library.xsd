@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:lib="http://library.gregorias.me/Library"
+  targetNamespace="http://library.gregorias.me/Library"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+  <xs:element name="library" type="lib:Library">
+    <xs:unique name="ISBN10Unique">
+      <xs:selector xpath="lib:positions/lib:book" />
+      <xs:field xpath="lib:isbn-10" />
+    </xs:unique>
+
+    <xs:unique name="ItemIdUnique">
+      <xs:selector xpath="lib:items/lib:item" />
+      <xs:field xpath="lib:itemId" />
+    </xs:unique>
+
+    <xs:unique name="UserIdUnique">
+      <xs:selector xpath="lib:accounts/lib:user" />
+      <xs:field xpath="lib:id" />
+    </xs:unique>
+
+    <xs:key name="ISBN10Key">
+      <xs:selector xpath="lib:positions/lib:book"/>
+      <xs:field xpath="lib:isbn-10"/>
+    </xs:key>
+
+    <xs:key name="ItemIdKey">
+      <xs:selector xpath="lib:items/lib:item"/>
+      <xs:field xpath="lib:itemId"/>
+    </xs:key>
+
+    <xs:key name="UserIdKey">
+      <xs:selector xpath="lib:accounts/lib:user"/>
+      <xs:field xpath="lib:id"/>
+    </xs:key>
+
+    <xs:keyref name="ItemToISBN10Ref" refer="lib:ISBN10Key">
+      <xs:selector xpath="lib:items/lib:item" />
+      <xs:field xpath="lib:isbn-10" />
+    </xs:keyref>
+
+    <xs:keyref name="RenteeIdRef" refer="lib:UserIdKey">
+      <xs:selector xpath="lib:items/lib:item/lib:history/lib:rent" />
+      <xs:field xpath="lib:renteeId" />
+    </xs:keyref>
+  </xs:element>
+
+  <xs:complexType name="Library">
+    <xs:sequence>
+      <xs:element name="positions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="book" type="lib:Book" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="items">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="item" type="lib:Item" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="accounts">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="user" type="lib:User" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="isbn-10">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:pattern value="\d{10}" />
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+
+  <xs:element name="isbn-13">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:pattern value="\d{3}-\d{10}" />
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+
+  <xs:complexType name="Book">
+    <xs:complexContent>
+      <xs:extension base="lib:Position">
+        <xs:sequence>
+          <xs:element ref="lib:isbn-10" />
+          <xs:element ref="lib:isbn-13" minOccurs="0" />
+          <xs:element name="authors">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="author" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="edition" type="xs:string" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="Item">
+    <xs:sequence>
+      <xs:element ref="lib:isbn-10" />
+      <xs:element name="itemId" type="xs:int"/>
+      <xs:element name="status" type="lib:ItemStatus" />
+      <xs:element name="history">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="rent" type="lib:HistoryItem" minOccurs="0" maxOccurs="unbounded" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="User">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" />
+      <xs:element name="birthday" type="xs:date" />
+      <xs:choice>
+        <xs:element name="PESEL" type="lib:PESELType" />
+        <xs:element name="passport" type="lib:Passport"/>
+      </xs:choice>
+      <xs:element name="address" type="lib:Address" />
+      <xs:element name="validTo">
+        <xs:simpleType>
+          <xs:union memberTypes="xs:date lib:Indefinite" />
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="id" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Address">
+    <xs:sequence>
+      <xs:element name="street" type="xs:string" />
+      <xs:element name="number" type="xs:string" />
+      <xs:element name="zip-code" type="xs:string" />
+      <xs:element name="city" type="xs:string" />
+      <xs:element name="country" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="HistoryItem">
+    <xs:sequence>
+      <xs:element name="renteeId" type="xs:int" />
+      <xs:element name="rentedFrom" type="xs:date" />
+      <xs:element name="rentedTo" type="xs:date" />
+      <xs:element name="returnDate" type="xs:date" minOccurs="0" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Passport">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string" />
+      <xs:element name="country" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Position">
+    <xs:sequence>
+      <xs:element name="title" type="xs:string" />
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="publisher" type="xs:string" />
+      <xs:element name="publishDate" type="xs:date" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="Indefinite">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="indefinite" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ItemStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="available" />
+      <xs:enumeration value="in store" />
+      <xs:enumeration value="rented" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="PESELType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d{11}" />
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

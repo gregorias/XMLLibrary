@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<library xmlns="http://library.gregorias.me/Library">
+  <positions>
+    <book>
+      <title>Batman and psychology</title>
+      <description>
+        A journey behind the mask and into the mind of Gotham City’s Caped Crusader
+      </description>
+      <publisher>John Wiley &amp; Sons</publisher>
+      <publishDate>2012-01-01</publishDate>
+      <isbn-10>1118167651</isbn-10>
+      <isbn-13>978-1118167656</isbn-13>
+      <authors>
+        <author>Travis Langley</author>
+        <author>Dennis O'Neil</author>
+        <author>Michael Uslan</author>
+      </authors>
+      <edition>1st edition</edition>
+    </book>
+    <book>
+      <title>Batman Vol. 1: The Court of Owlts</title>
+      <description>
+        Following his ground-breaking, critically acclaimed run on Detective
+        Comics, writer Scott Snyder (American Vampire) alongside artist Greg
+        Capullo (Spawn) begins a new era of The Dark Knight as with the relaunch
+        of Batman, as a part of DC Comics—The New 52!
+      </description>
+      <publisher>DC Comics</publisher>
+      <publishDate>2013-01-01</publishDate>
+      <isbn-10>1401235425</isbn-10>
+      <authors>
+        <author>Scott Snyder</author>
+        <author>Greg Capullo</author>
+      </authors>
+      <edition>1st edition</edition>
+    </book>
+  </positions>
+  <items>
+    <item>
+      <isbn-10>1118167651</isbn-10>
+      <itemId>1</itemId>
+      <status>available</status>
+      <history />
+    </item>
+    <item>
+      <isbn-10>1118167651</isbn-10>
+      <itemId>2</itemId>
+      <status>in store</status>
+      <history />
+    </item>
+    <item>
+      <isbn-10>1118167651</isbn-10>
+      <itemId>3</itemId>
+      <status>rented</status>
+      <history>
+        <rent>
+          <renteeId>1</renteeId>
+          <rentedFrom>2014-10-10</rentedFrom>
+          <rentedTo>2015-02-01</rentedTo>
+        </rent>
+      </history>
+    </item>
+  </items>
+
+  <accounts>
+    <user>
+      <name>Alfred Pennyworth</name>
+      <birthday>1940-10-25</birthday>
+      <PESEL>40102500000</PESEL>
+      <address>
+        <street>Wayne St.</street>
+        <number>10</number>
+        <zip-code>00000</zip-code>
+        <city>Gotham</city>
+        <country>USA</country>
+      </address>
+      <validTo>indefinite</validTo>
+      <id>1</id>
+    </user>
+    <user>
+      <name>Bruce Wayne</name>
+      <birthday>1980-05-12</birthday>
+      <PESEL>80051200000</PESEL>
+      <address>
+        <street>Wayne St.</street>
+        <number>10</number>
+        <zip-code>00000</zip-code>
+        <city>Gotham</city>
+        <country>USA</country>
+      </address>
+      <validTo>2016-01-01</validTo>
+      <id>2</id>
+    </user>
+    <user>
+      <name>Oswald Cobblepot</name>
+      <birthday>1960-04-22</birthday>
+      <passport>
+        <id>0000001</id>
+        <country>Canada</country>
+      </passport>
+      <address>
+        <street>Lake Rd.</street>
+        <number>01</number>
+        <zip-code>00000</zip-code>
+        <city>Gotham</city>
+        <country>USA</country>
+      </address>
+      <validTo>2017-01-01</validTo>
+      <id>3</id>
+    </user>
+  </accounts>
+</library>
