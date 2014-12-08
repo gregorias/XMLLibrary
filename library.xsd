@@ -5,21 +5,6 @@
   elementFormDefault="qualified"
   attributeFormDefault="unqualified">
   <xs:element name="library" type="lib:Library">
-    <xs:unique name="ISBN10Unique">
-      <xs:selector xpath="lib:positions/lib:book" />
-      <xs:field xpath="lib:isbn-10" />
-    </xs:unique>
-
-    <xs:unique name="ItemIdUnique">
-      <xs:selector xpath="lib:items/lib:item" />
-      <xs:field xpath="lib:itemId" />
-    </xs:unique>
-
-    <xs:unique name="UserIdUnique">
-      <xs:selector xpath="lib:accounts/lib:user" />
-      <xs:field xpath="lib:id" />
-    </xs:unique>
-
     <xs:key name="ISBN10Key">
       <xs:selector xpath="lib:positions/lib:book"/>
       <xs:field xpath="lib:isbn-10"/>

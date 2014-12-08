@@ -5,9 +5,7 @@ apply plugin: 'idea'
 apply plugin: 'checkstyle'
 apply plugin: 'findbugs'
 apply plugin: 'jacoco'
-apply plugin: 'maven'
 apply plugin: 'pmd'
-apply plugin: 'signing'
 
 def DEPENDENCY_LIB_DIRECTORY = 'lib/'
 
