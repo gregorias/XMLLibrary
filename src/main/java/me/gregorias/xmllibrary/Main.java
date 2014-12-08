@@ -1,4 +1,4 @@
-package me.gregorias;
+package me.gregorias.xmllibrary;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;

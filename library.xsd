@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  xmlns:lib="http://library.gregorias.me/Library"
-  targetNamespace="http://library.gregorias.me/Library"
+  xmlns:lib="http://xmllibrary.gregorias.me/Library"
+  targetNamespace="http://xmllibrary.gregorias.me/Library"
   elementFormDefault="qualified"
   attributeFormDefault="unqualified">
   <xs:element name="library" type="lib:Library">

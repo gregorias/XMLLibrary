@@ -35,6 +35,12 @@ compileTestJava {
   targetCompatibility = '1.8'
 }
 
+println sourceSets.main.java.srcDirs
+
+javadoc {
+  exclude "**/jaxb/*.java"
+}
+
 jacoco {
   toolVersion = '0.7.2.201409121644'
 }
