@@ -8,6 +8,9 @@ apply plugin: 'jacoco'
 apply plugin: 'pmd'
 
 def DEPENDENCY_LIB_DIRECTORY = 'lib/'
+def SCHEMA_LOCATION = "resources/config/library.xsd"
+def JAXB_BINDINGS_LOCATION = "resources/config/bindings.xjb"
+def MAIN_SOURCE_DIRECTORY = "src/main/java"
 
 group = 'me.gregorias'
 version = '0.0.1'
@@ -23,6 +26,12 @@ dependencies {
   compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.7'
   testCompile group: 'junit', name: 'junit', version: '4.11'
   testCompile group: 'org.mockito', name: 'mockito-core', version: '1.10.8'
+}
+
+task generateJAXBClasses << {
+  ("xjc $SCHEMA_LOCATION -d $MAIN_SOURCE_DIRECTORY " +
+  "-p me.gregorias.xmllibrary.library.jaxb -b $JAXB_BINDINGS_LOCATION " +
+  "-extension").execute()
 }
 
 compileJava {

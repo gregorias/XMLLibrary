@@ -1,39 +1,20 @@
 package me.gregorias.xmllibrary;
 
-import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
+import me.gregorias.xmllibrary.library.jaxb.Library;
 
-public class Main extends Application {
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
-  @Override
-  public void start(Stage primaryStage) {
-    Button btn = new Button();
-    btn.setText("Say 'Hello World'");
-    btn.setOnAction(new HelloWorldEventHandler());
-
-    StackPane root = new StackPane();
-    root.getChildren().add(btn);
-
-    Scene scene = new Scene(root, 300, 250);
-
-    primaryStage.setTitle("Hello World!");
-    primaryStage.setScene(scene);
-    primaryStage.show();
-  }
-
-  public static void main(String[] args) {
-    launch(args);
-  }
-
-  private static class HelloWorldEventHandler implements EventHandler<ActionEvent> {
-    @Override
-    public void handle(ActionEvent event) {
-      System.out.println("Hello World!");
-    }
+public class Main {
+  private static Path PATH_TO_LIBRARY_XML =
+    FileSystems.getDefault().getPath("resources/config/library.xml");
+  public static void main(String[] args) throws JAXBException {
+    JAXBContext jc = JAXBContext.newInstance(Library.class);
+    Unmarshaller unmarshaller = jc.createUnmarshaller();
+    Library library = (Library) unmarshaller.unmarshal(PATH_TO_LIBRARY_XML.toFile());
+    System.out.println(library.getPositions());
   }
 }
