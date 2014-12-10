@@ -1,62 +1,97 @@
 package me.gregorias.xmllibrary.interfaces.gui;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import me.gregorias.xmllibrary.Main;
+import me.gregorias.xmllibrary.library.LibraryFacade;
 
 /**
- * Created by grzesiek on 08.12.14.
+ * Main starting point for JavaFX GUI.
  */
 public class MainApplication extends Application {
+  private static final String CSS_PATH = "/main.css";
+  private static final int SCENE_WIDTH = 800;
+  private static final int SCENE_HEIGHT = 600;
+  private static LibraryFacade FACADE;
 
   @Override
   public void start(Stage primaryStage) {
     BorderPane borderPane = new BorderPane();
+    borderPane.setTop(createTopPane());
+    borderPane.setLeft(createLeftMenu());
+    borderPane.setMinSize(SCENE_WIDTH, SCENE_HEIGHT);
+    borderPane.setMaxSize(SCENE_WIDTH, SCENE_HEIGHT);
 
-    borderPane.getChildren().add(createTopPane());
+    Scene scene = new Scene(borderPane);
+    scene.getStylesheets().add(MainApplication.class.getResource(CSS_PATH).toExternalForm());
 
-    Scene scene = new Scene(borderPane, 300, 250);
-
-    primaryStage.setTitle("Hello World!");
+    primaryStage.setTitle(Main.APPLICATION_NAME);
     primaryStage.setScene(scene);
+    primaryStage.setResizable(false);
     primaryStage.show();
   }
 
-  public static void main(String[] args) {
-    launch(args);
-  }
-
-  private static class HelloWorldEventHandler implements EventHandler<ActionEvent> {
-    @Override
-    public void handle(ActionEvent event) {
-      System.out.println("Hello World!");
-    }
+  public static void main(LibraryFacade facade) {
+    FACADE = facade;
+    launch();
   }
 
   private HBox createTopPane() {
     HBox hbox = new HBox();
-    hbox.setPadding(new Insets(15, 12, 15, 12));
-    hbox.setSpacing(10);
-    hbox.setStyle("-fx-background-color: #336699;");
-    Text scenetitle = new Text("XMLLibrary");
-    scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+    hbox.setId("top-pane");
+
+    Label mainLabel = new Label(Main.APPLICATION_NAME);
+    mainLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+    mainLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+    mainLabel.setTextFill(Color.web("#FFFFFF"));
+
     Button loginButton = new Button("login");
-    loginButton.setAlignment(Pos.CENTER_RIGHT);
     Button registerButton = new Button("register");
-    registerButton.setAlignment(Pos.CENTER_RIGHT);
-    hbox.getChildren().addAll(scenetitle, loginButton, registerButton);
-    hbox.setHgrow(scenetitle, Priority.ALWAYS);
+    hbox.getChildren().addAll(mainLabel, loginButton, registerButton);
+
+    HBox.setHgrow(mainLabel, Priority.ALWAYS);
     return hbox;
+  }
+
+  private static VBox createLeftMenu() {
+    VBox vbox = new VBox();
+    vbox.setId("left-menu");
+
+    addOptionsToLeftMenu(vbox, "Library menu", new Hyperlink[]{
+      new Hyperlink("Catalogue"),
+      new Hyperlink("Find books")});
+
+    addOptionsToLeftMenu(vbox, "Profile", new Hyperlink[]{
+      new Hyperlink("Profile information"),
+      new Hyperlink("Rented positions")});
+
+    addOptionsToLeftMenu(vbox, "LibrarianToolbox", new Hyperlink[]{
+      new Hyperlink("Overdue rents"),
+      new Hyperlink("Add positions")});
+
+    return vbox;
+  }
+
+  private static void addOptionsToLeftMenu(VBox vbox, String title, Hyperlink... options) {
+    Text textTitle = new Text(title);
+    textTitle.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+    vbox.getChildren().add(textTitle);
+
+    for (int index = 0; index < options.length; index++) {
+      options[index].getStyleClass().add("option");
+      vbox.getChildren().add(options[index]);
+    }
   }
 }

@@ -1,0 +1,18 @@
+#top-pane {
+  -fx-background-color: #336677;
+  -fx-border-width: 0px 0px 2px 0px;
+  -fx-border-color: #000000;
+  -fx-padding: 15px 12px;
+  -fx-spacing: 10px;
+}
+
+#left-menu {
+  -fx-background-color: #90c0d0;
+  -fx-border-width: 2px;
+  -fx-padding: 10px;
+  -fx-spacing: 8px;
+}
+
+#left-menu > .option {
+  -fx-margin: 0px 0px 0px 8px;
+}

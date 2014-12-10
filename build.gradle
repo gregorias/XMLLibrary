@@ -44,6 +44,7 @@ compileTestJava {
 }
 
 jar {
+  from processResources.destinationDir
   manifest {
     attributes 'Main-Class': 'me.gregorias.xmllibrary.Main',
                'Class-Path': generateClassPath(configurations.runtime,
