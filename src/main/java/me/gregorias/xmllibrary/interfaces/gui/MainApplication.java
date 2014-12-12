@@ -36,6 +36,7 @@ public class MainApplication extends Application {
   private static final String LIBRARIAN_STRING = "Librarian";
   private static final int SCENE_WIDTH = 800;
   private static final int SCENE_HEIGHT = 600;
+  private static final int LEFT_MENU_WIDTH = 160;
   private static LibraryFacade FACADE;
 
   private HBox mTopPane;
@@ -105,19 +106,8 @@ public class MainApplication extends Application {
   private void createLeftMenu() {
     mLeftMenu = new VBox();
     mLeftMenu.setId("left-menu");
-
-    addOptionsToLeftMenu(mLeftMenu, "Library menu",
-        new Hyperlink("Catalogue"),
-        new Hyperlink("Find books"));
-
-    addOptionsToLeftMenu(mLeftMenu, "Profile",
-        new Hyperlink("Profile information"),
-        new Hyperlink("Rented positions"));
-
-    addOptionsToLeftMenu(mLeftMenu, "Librarian Toolbox",
-        new Hyperlink("Overdue rents"),
-        new Hyperlink("Manage users"),
-        new Hyperlink("Add positions"));
+    mLeftMenu.setMinWidth(LEFT_MENU_WIDTH);
+    mLeftMenu.setMaxWidth(LEFT_MENU_WIDTH);
   }
 
   private void createTopPane() {
@@ -173,8 +163,34 @@ public class MainApplication extends Application {
     }
   }
 
+  private void updateLeftMenu() {
+    FACADE.acquireLock();
+    mLeftMenu.getChildren().clear();
+    addOptionsToLeftMenu(mLeftMenu, "Library menu",
+        new Hyperlink("Catalogue"),
+        new Hyperlink("Find books"));
+    try {
+      if (FACADE.isLoggedIn()) {
+        if (FACADE.getCurrentLoggedInAccount().isLibrarian()) {
+          addOptionsToLeftMenu(mLeftMenu, "Librarian Toolbox",
+              new Hyperlink("Overdue rents"),
+              new Hyperlink("Manage users"),
+              new Hyperlink("Add positions"));
+        } else {
+          addOptionsToLeftMenu(mLeftMenu, "Profile",
+              new Hyperlink("Profile information"),
+              new Hyperlink("Rented positions"));
+        }
+      }
+    } finally {
+      FACADE.releaseLock();
+    }
+
+  }
+
   private void drawScene() {
     LOGGER.debug("drawScene()");
     updateTopPane();
+    updateLeftMenu();
   }
 }
