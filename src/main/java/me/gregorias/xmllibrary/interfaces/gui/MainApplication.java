@@ -1,6 +1,8 @@
 package me.gregorias.xmllibrary.interfaces.gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
@@ -16,21 +18,43 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import me.gregorias.xmllibrary.Main;
 import me.gregorias.xmllibrary.library.LibraryFacade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Main starting point for JavaFX GUI.
  */
 public class MainApplication extends Application {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MainApplication.class);
   private static final String CSS_PATH = "/main.css";
+  private static final String LOGGED_IN_ACCOUNT_FORMAT_STRING = "Logged in(%s)";
+  private static final String LIBRARIAN_STRING = "Librarian";
   private static final int SCENE_WIDTH = 800;
   private static final int SCENE_HEIGHT = 600;
   private static LibraryFacade FACADE;
 
+  private HBox mTopPane;
+  private List<Node> mTopPaneNodeList;
+  private Label mTopPaneMainLabel;
+  private Label mTopPaneLoginInfoLabel;
+  private Button mTopPaneLoginButton;
+  private Button mTopPaneLogoutButton;
+  private Button mTopPaneRegisterButton;
+
+  private VBox mLeftMenu;
+
   @Override
   public void start(Stage primaryStage) {
     BorderPane borderPane = new BorderPane();
-    borderPane.setTop(createTopPane());
-    borderPane.setLeft(createLeftMenu());
+    createTopPane();
+    createLeftMenu();
+    borderPane.setTop(mTopPane);
+    borderPane.setLeft(mLeftMenu);
     borderPane.setMinSize(SCENE_WIDTH, SCENE_HEIGHT);
     borderPane.setMaxSize(SCENE_WIDTH, SCENE_HEIGHT);
 
@@ -40,6 +64,10 @@ public class MainApplication extends Application {
     primaryStage.setTitle(Main.APPLICATION_NAME);
     primaryStage.setScene(scene);
     primaryStage.setResizable(false);
+
+    FACADE.addObserver(new LibraryObserver());
+
+    drawScene();
     primaryStage.show();
   }
 
@@ -48,43 +76,21 @@ public class MainApplication extends Application {
     launch();
   }
 
-  private HBox createTopPane() {
-    HBox hbox = new HBox();
-    hbox.setId("top-pane");
-
-    Label mainLabel = new Label(Main.APPLICATION_NAME);
-    mainLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-    mainLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-    mainLabel.setTextFill(Color.web("#FFFFFF"));
-
-    Button loginButton = new Button("login");
-    Button registerButton = new Button("register");
-    hbox.getChildren().addAll(mainLabel, loginButton, registerButton);
-
-    HBox.setHgrow(mainLabel, Priority.ALWAYS);
-    return hbox;
+  private class LibraryObserver implements Observer {
+    @Override
+    public void update(Observable observable, Object arg) {
+      LOGGER.debug("LibraryObserver.update()");
+      FACADE.acquireLock();
+      try {
+        FACADE.getCurrentLoggedInAccount();
+      } finally {
+        FACADE.releaseLock();
+      }
+      Platform.runLater(() -> drawScene());
+    }
   }
 
-  private static VBox createLeftMenu() {
-    VBox vbox = new VBox();
-    vbox.setId("left-menu");
-
-    addOptionsToLeftMenu(vbox, "Library menu", new Hyperlink[]{
-      new Hyperlink("Catalogue"),
-      new Hyperlink("Find books")});
-
-    addOptionsToLeftMenu(vbox, "Profile", new Hyperlink[]{
-      new Hyperlink("Profile information"),
-      new Hyperlink("Rented positions")});
-
-    addOptionsToLeftMenu(vbox, "LibrarianToolbox", new Hyperlink[]{
-      new Hyperlink("Overdue rents"),
-      new Hyperlink("Add positions")});
-
-    return vbox;
-  }
-
-  private static void addOptionsToLeftMenu(VBox vbox, String title, Hyperlink... options) {
+  private void addOptionsToLeftMenu(VBox vbox, String title, Hyperlink... options) {
     Text textTitle = new Text(title);
     textTitle.setFont(Font.font("Arial", FontWeight.BOLD, 14));
     vbox.getChildren().add(textTitle);
@@ -93,5 +99,82 @@ public class MainApplication extends Application {
       options[index].getStyleClass().add("option");
       vbox.getChildren().add(options[index]);
     }
+  }
+
+
+  private void createLeftMenu() {
+    mLeftMenu = new VBox();
+    mLeftMenu.setId("left-menu");
+
+    addOptionsToLeftMenu(mLeftMenu, "Library menu",
+        new Hyperlink("Catalogue"),
+        new Hyperlink("Find books"));
+
+    addOptionsToLeftMenu(mLeftMenu, "Profile",
+        new Hyperlink("Profile information"),
+        new Hyperlink("Rented positions"));
+
+    addOptionsToLeftMenu(mLeftMenu, "Librarian Toolbox",
+        new Hyperlink("Overdue rents"),
+        new Hyperlink("Manage users"),
+        new Hyperlink("Add positions"));
+  }
+
+  private void createTopPane() {
+    mTopPane = new HBox();
+    mTopPane.setId("top-pane");
+
+    mTopPaneNodeList = new ArrayList<>();
+
+    mTopPaneMainLabel = new Label(Main.APPLICATION_NAME);
+    mTopPaneMainLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+    mTopPaneMainLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+    mTopPaneMainLabel.setTextFill(Color.web("#FFFFFF"));
+
+    mTopPaneLoginInfoLabel = new Label("");
+    mTopPaneLoginInfoLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+    mTopPaneLoginInfoLabel.setTextFill(Color.web("#FFFFFF"));
+
+    mTopPaneLoginButton = new Button("login");
+    LoginRequestHandler loginHandler = new LoginRequestHandler(FACADE);
+    mTopPaneLoginButton.setOnAction(loginHandler);
+    mTopPaneLogoutButton = new Button("logout");
+    LogoutRequestHandler logoutHandler = new LogoutRequestHandler(FACADE);
+    mTopPaneLogoutButton.setOnAction(logoutHandler);
+
+    mTopPaneRegisterButton = new Button("register");
+
+    mTopPane.setHgrow(mTopPaneMainLabel, Priority.ALWAYS);
+  }
+
+  private void updateTopPane() {
+    mTopPane.getChildren().clear();
+    mTopPane.getChildren().add(mTopPaneMainLabel);
+    FACADE.acquireLock();
+    try {
+      if (!FACADE.isLoggedIn()) {
+        mTopPane.getChildren().add(mTopPaneLoginButton);
+        mTopPane.getChildren().add(mTopPaneRegisterButton);
+      } else {
+        mTopPane.getChildren().add(mTopPaneLoginInfoLabel);
+        mTopPane.getChildren().add(mTopPaneLogoutButton);
+
+        LibraryFacade.Account account = FACADE.getCurrentLoggedInAccount();
+        String accountName;
+        if (account.isLibrarian()) {
+          accountName = LIBRARIAN_STRING;
+        } else {
+          accountName = account.getUser().getName();
+        }
+        mTopPaneLoginInfoLabel.setText(String.format(LOGGED_IN_ACCOUNT_FORMAT_STRING, accountName));
+      }
+    } finally {
+      FACADE.releaseLock();
+    }
+  }
+
+  private void drawScene() {
+    LOGGER.debug("drawScene()");
+    updateTopPane();
   }
 }
