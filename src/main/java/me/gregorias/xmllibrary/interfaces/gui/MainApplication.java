@@ -133,6 +133,8 @@ public class MainApplication extends Application {
     mTopPaneLogoutButton.setOnAction(logoutHandler);
 
     mTopPaneRegisterButton = new Button("register");
+    RegisterRequestHandler registerHandler = new RegisterRequestHandler(FACADE);
+    mTopPaneRegisterButton.setOnAction(registerHandler);
 
     mTopPane.setHgrow(mTopPaneMainLabel, Priority.ALWAYS);
   }

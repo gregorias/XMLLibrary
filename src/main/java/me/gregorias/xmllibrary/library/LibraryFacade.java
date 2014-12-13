@@ -8,11 +8,20 @@ import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.crypto.Data;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.Observable;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -98,6 +107,21 @@ public class LibraryFacade extends Observable {
     }
   }
 
+  public void registerNewUser(User user) {
+    int newId = calculateNextFreeUserId();
+    user.setId(newId);
+
+    String yesterdayValidTo = calculateYesterdayValidToString();
+    user.setValidTo(yesterdayValidTo);
+    mLibrary.getAccounts().getUsers().add(user);
+  }
+
+  public void save() throws JAXBException {
+    JAXBContext jc = JAXBContext.newInstance(Library.class);
+    Marshaller marshaller = jc.createMarshaller();
+    marshaller.marshal(mLibrary, mLibraryXMLPath.toFile());
+  }
+
   @Override
   public void setChanged() {
     LOGGER.debug("setChanged()");
@@ -135,10 +159,48 @@ public class LibraryFacade extends Observable {
     }
   }
 
+  private int calculateNextFreeUserId() {
+    Set<Integer> userIds = new TreeSet<>(getSetOfAllUserIds());
+    if (userIds.size() == 0) {
+      return 1;
+    } else {
+      int idCandidate = 1;
+      for (Integer id : userIds) {
+        if (id > idCandidate) {
+          break;
+        }
+        idCandidate = id + 1;
+      }
+      return idCandidate;
+    }
+  }
+
+  private String calculateYesterdayValidToString() {
+    GregorianCalendar calendar = (GregorianCalendar) GregorianCalendar.getInstance();
+    calendar.add(GregorianCalendar.DAY_OF_WEEK, -1);
+
+    try {
+      XMLGregorianCalendar xmlYesterdayCalendar =
+          DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar);
+      return xmlYesterdayCalendar.toXMLFormat();
+    } catch (DatatypeConfigurationException e) {
+      LOGGER.error("Unexpected exception.", e);
+      throw new IllegalStateException(e);
+    }
+  }
+
   private Library generateJAXBLibrary() throws JAXBException {
     JAXBContext jc = JAXBContext.newInstance(Library.class);
     Unmarshaller unmarshaller = jc.createUnmarshaller();
     return (Library) unmarshaller.unmarshal(mLibraryXMLPath.toFile());
+  }
+
+  private Set<Integer> getSetOfAllUserIds() {
+    Set<Integer> allIds = new TreeSet<>();
+    for (User user : mLibrary.getAccounts().getUsers()) {
+      allIds.add(user.getId());
+    }
+    return allIds;
   }
 
   /* private Document parseLibraryDocument() throws IOException, ParserConfigurationException,

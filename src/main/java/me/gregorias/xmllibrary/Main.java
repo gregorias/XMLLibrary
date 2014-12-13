@@ -13,7 +13,7 @@ import java.nio.file.Path;
 public class Main {
   public static final String APPLICATION_NAME = "XMLLibrary";
   private static Path PATH_TO_LIBRARY_XML =
-      FileSystems.getDefault().getPath("resources/config/library.xml");
+      FileSystems.getDefault().getPath("library.xml");
 
   public static void main(String[] args) throws JAXBException, IOException, SAXException,
       ParserConfigurationException {
@@ -21,6 +21,7 @@ public class Main {
     facade.initialize();
 
     MainApplication .main(facade);
+    facade.save();
 
     //final URI baseURI = URI.create(String.format("http://%s:%s/", "localhost", "8080"));
     //Lock lock = new ReentrantReadWriteLock().readLock();
