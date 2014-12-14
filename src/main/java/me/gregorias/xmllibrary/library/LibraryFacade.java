@@ -60,6 +60,12 @@ public class LibraryFacade extends Observable {
     mLibraryLock.lock();
   }
 
+  public Optional<Book> findBook(String isbn10) {
+    return mLibrary.getPositions().getBooks().stream()
+        .filter((book) -> book.getIsbn10().equals(isbn10))
+        .findAny();
+  }
+
   public Optional<Item> getItemOfGivenStatus(Book book, List<Item> items, String status) {
     return items.stream().filter((item) -> item.getStatus().equals(status)).findAny();
   }

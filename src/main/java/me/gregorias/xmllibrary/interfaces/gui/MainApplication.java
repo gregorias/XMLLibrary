@@ -39,6 +39,10 @@ public class MainApplication extends Application {
   private static final int LEFT_MENU_WIDTH = 160;
   private static LibraryFacade FACADE;
 
+  private Hyperlink mCatalogueOption;
+  private Hyperlink mProfileInformationOption;
+  private Hyperlink mRentedPositionsOption;
+
   private BorderPane mMainPane;
 
   private HBox mTopPane;
@@ -50,8 +54,14 @@ public class MainApplication extends Application {
 
   private VBox mLeftMenu;
 
+  private List<Book> mSelectedBooks;
+  private CenterMode mCenterMode = CenterMode.CATALOGUE;
+
+
   @Override
   public void start(Stage primaryStage) {
+    selectAllBooks();
+
     mMainPane = new BorderPane();
     createTopPane();
     createLeftMenu();
@@ -76,6 +86,12 @@ public class MainApplication extends Application {
   public static void main(LibraryFacade facade) {
     FACADE = facade;
     launch();
+  }
+
+  private static enum CenterMode {
+    CATALOGUE,
+    PROFILE_INFORMATION,
+    RENTED_POSITIONS
   }
 
   private class LibraryObserver implements Observer {
@@ -108,6 +124,23 @@ public class MainApplication extends Application {
     mLeftMenu.setId("left-menu");
     mLeftMenu.setMinWidth(LEFT_MENU_WIDTH);
     mLeftMenu.setMaxWidth(LEFT_MENU_WIDTH);
+
+    mCatalogueOption = new Hyperlink("Catalogue");
+    mCatalogueOption.setOnAction((e) -> {selectAllBooks();
+      mCenterMode = CenterMode.CATALOGUE;
+      updateCenter();});
+
+    mProfileInformationOption = new Hyperlink("Profile Information");
+    mProfileInformationOption.setOnAction((e) -> {
+      mCenterMode = CenterMode.PROFILE_INFORMATION;
+      updateCenter();
+    });
+
+    mRentedPositionsOption = new Hyperlink("Rented Positions");
+    mRentedPositionsOption.setOnAction((e) -> {
+      mCenterMode = CenterMode.RENTED_POSITIONS;
+      updateCenter();
+    });
   }
 
   private void createTopPane() {
@@ -140,9 +173,14 @@ public class MainApplication extends Application {
   private void updateCenter() {
     FACADE.acquireLock();
     try {
-      List<Book> books = FACADE.getLibrary().getPositions().getBooks();
-      Pane bookShelf = BookShelf.createBookShelfPane(FACADE, books);
-      mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(bookShelf));
+      if (mCenterMode.equals(CenterMode.CATALOGUE)) {
+        Pane bookShelf = BookShelf.createBookShelfPane(FACADE, mSelectedBooks);
+        mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(bookShelf));
+      } else if (mCenterMode.equals(CenterMode.PROFILE_INFORMATION)) {
+        mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(new ProfileInformationPane(FACADE)));
+      } else {
+        mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(new RentedPositionsPane(FACADE)));
+      }
     } finally {
       FACADE.releaseLock();
     }
@@ -177,8 +215,11 @@ public class MainApplication extends Application {
   private void updateLeftMenu() {
     FACADE.acquireLock();
     mLeftMenu.getChildren().clear();
+
+    Hyperlink profileInfoOption = new Hyperlink("Catalogue");
+
     addOptionsToLeftMenu(mLeftMenu, "Library menu",
-        new Hyperlink("Catalogue"),
+        mCatalogueOption,
         new Hyperlink("Find books"));
     try {
       if (FACADE.isLoggedIn()) {
@@ -189,8 +230,8 @@ public class MainApplication extends Application {
               new Hyperlink("Add positions"));
         } else {
           addOptionsToLeftMenu(mLeftMenu, "Profile",
-              new Hyperlink("Profile information"),
-              new Hyperlink("Rented positions"));
+              mProfileInformationOption,
+              mRentedPositionsOption);
         }
       }
     } finally {
@@ -201,8 +242,15 @@ public class MainApplication extends Application {
 
   private void drawScene() {
     LOGGER.debug("drawScene()");
+    if (!FACADE.isLoggedIn()) {
+      mCenterMode = CenterMode.CATALOGUE;
+    }
     updateTopPane();
     updateLeftMenu();
     updateCenter();
+  }
+
+  private void selectAllBooks() {
+    mSelectedBooks = FACADE.getLibrary().getPositions().getBooks();
   }
 }

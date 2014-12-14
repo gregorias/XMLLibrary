@@ -26,3 +26,13 @@
   -fx-border-width: 2px;
   -fx-border-color: #000000;
 }
+
+.rentedpositionpane {
+  -fx-padding: 10px;
+  -fx-border-width: 2px;
+  -fx-border-color: #000000;
+}
+
+.profileinfo, .pane {
+  -fx-padding: 10px;
+}
