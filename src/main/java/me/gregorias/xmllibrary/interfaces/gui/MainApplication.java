@@ -141,7 +141,7 @@ public class MainApplication extends Application {
     FACADE.acquireLock();
     try {
       List<Book> books = FACADE.getLibrary().getPositions().getBooks();
-      Pane bookShelf = BookPane.createBookShelfPane(books);
+      Pane bookShelf = BookShelf.createBookShelfPane(FACADE, books);
       mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(bookShelf));
     } finally {
       FACADE.releaseLock();

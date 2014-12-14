@@ -1,5 +1,9 @@
 package me.gregorias.xmllibrary.library;
 
+import me.gregorias.xmllibrary.library.jaxb.Book;
+import me.gregorias.xmllibrary.library.jaxb.HistoryItem;
+import me.gregorias.xmllibrary.library.jaxb.Item;
+import me.gregorias.xmllibrary.library.jaxb.ItemStatus;
 import me.gregorias.xmllibrary.library.jaxb.Library;
 import me.gregorias.xmllibrary.library.jaxb.User;
 import org.slf4j.Logger;
@@ -10,7 +14,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.crypto.Data;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -18,12 +21,15 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Observable;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * A Facade to library data which handles synchronization and authentication.
@@ -45,12 +51,68 @@ public class LibraryFacade extends Observable {
     mLibraryLock.lock();
   }
 
+  public Optional<Item> getItemOfGivenStatus(Book book, List<Item> items, String status) {
+    return items.stream().filter((item) -> item.getStatus().equals(status)).findAny();
+  }
+
+  public BookStatus getBookStatus(Book book) {
+    List<Item> items = getBookItems(book);
+    Optional<Item> availableItem = items.stream().filter((item) -> item.getStatus().equals(
+        ItemStatus.AVAILABLE)).findAny();
+    Optional<Item> rentableItem = items.stream().filter((item) -> !item.getStatus().equals(
+        ItemStatus.RENTED)).findAny();
+    if (rentableItem.isPresent()) {
+      BookStatus.Status status;
+      if (availableItem.isPresent()) {
+        status = BookStatus.Status.AVAILABLE;
+      } else {
+        status = BookStatus.Status.IN_STORE;
+      }
+      return new BookStatus(status);
+    }
+
+    Optional<Item> rentedItem = items.stream().findFirst();
+    if (rentedItem.isPresent()) {
+      LinkedList<HistoryItem> rents = new LinkedList<>(rentedItem.get().getHistory().getRents());
+      rents.getLast().getRentedTo();
+      return new BookStatus(BookStatus.Status.RENTED, rents.getLast().getRentedTo().toString());
+    } else {
+      return new BookStatus(BookStatus.Status.UNAVAILABLE);
+    }
+  }
+
+  public List<Item> getBookItems(Book book) {
+    return mLibrary.getItems().getItems().stream()
+        .filter((item) -> item.getIsbn10().equals(book.getIsbn10()))
+        .collect(Collectors.toList());
+  }
+
   public Account getCurrentLoggedInAccount() {
     return mLoggedInAccount;
   }
 
   public Library getLibrary() {
     return mLibrary;
+  }
+
+  public List<Item> getUserItems(User user) {
+    return mLibrary.getItems().getItems().stream()
+        .filter((item) -> isItemRentedByUser(user, item))
+        .collect(Collectors.toList());
+  }
+
+  public boolean isBookRentedByUser(User user, Book book) {
+    long count = getUserItems(user).stream()
+        .filter((item) -> item.getIsbn10().equals(book.getIsbn10()))
+        .count();
+    return count != 0;
+  }
+
+  public boolean isItemRentedByUser(User user, Item item) {
+    long count = item.getHistory().getRents().stream()
+        .filter((historyItem) -> historyItem.getRenteeId() == user.getId())
+        .filter((historyItem) -> historyItem.getReturnDate() == null).count();
+    return count != 0;
   }
 
   public void initialize() throws ParserConfigurationException, SAXException, IOException,

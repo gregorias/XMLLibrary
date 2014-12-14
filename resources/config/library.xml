@@ -72,6 +72,24 @@ This amazing Batman best-of collection includes stories from DETECTIVE COMICS #2
         </rent>
       </history>
     </item>
+    <item>
+      <isbn-10>1401235425</isbn-10>
+      <itemId>4</itemId>
+      <status>in store</status>
+      <history />
+    </item>
+    <item>
+      <isbn-10>1401247580</isbn-10>
+      <itemId>5</itemId>
+      <status>rented</status>
+      <history>
+        <rent>
+          <renteeId>1</renteeId>
+          <rentedFrom>2014-10-10</rentedFrom>
+          <rentedTo>2015-02-01</rentedTo>
+        </rent>
+      </history>
+    </item>
   </items>
 
   <accounts>
