@@ -16,3 +16,13 @@
 #left-menu > .option {
   -fx-margin: 0px 0px 0px 8px;
 }
+
+.bookshelf {
+  -fx-padding: 10px;
+}
+
+.bookpane {
+  -fx-padding: 10px;
+  -fx-border-width: 2px;
+  -fx-border-color: #000000;
+}

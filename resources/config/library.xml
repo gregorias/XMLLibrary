@@ -18,12 +18,9 @@
       <edition>1st edition</edition>
     </book>
     <book>
-      <title>Batman Vol. 1: The Court of Owlts</title>
+      <title>Batman Vol. 1: The Court of Owls</title>
       <description>
-        Following his ground-breaking, critically acclaimed run on Detective
-        Comics, writer Scott Snyder (American Vampire) alongside artist Greg
-        Capullo (Spawn) begins a new era of The Dark Knight as with the relaunch
-        of Batman, as a part of DC Comics—The New 52!
+        Following his ground-breaking, critically acclaimed run on Detective Comics, writer Scott Snyder (American Vampire) alongside artist Greg Capullo (Spawn) begins a new era of The Dark Knight as with the relaunch of Batman, as a part of DC Comics—The New 52!
       </description>
       <publisher>DC Comics</publisher>
       <publishDate>2013-01-01</publishDate>
@@ -31,6 +28,21 @@
       <authors>
         <author>Scott Snyder</author>
         <author>Greg Capullo</author>
+      </authors>
+      <edition>1st edition</edition>
+    </book>
+    <book>
+      <title>Batman: A Celebration of 75 Years</title>
+      <description>
+2014 marks the 75th anniversary of Batman, the world's greatest detective! And if a hero is measured by his foes, then Batman is truly the greatest hero of all, as his incredible rogues gallery is unrivaled in comics history. This new title collects the best Batman stories of all time, arranged according to era, and featuring appearances by The Joker, The Penguin, Catwoman, The Riddler and many others.
+
+This amazing Batman best-of collection includes stories from DETECTIVE COMICS #27, 83, 211, 216, 327, 359, 395, 442, 474, 574, 633, 711, 757 and 821, BATMAN #1, 49, 181, 497, BATMAN #2 (THE NEW 52), WORLD’S FINEST COMICS #94, DC SPECIAL SERIES #21 and BATMAN SPECIAL #1!
+      </description>
+      <publisher>DC Comics</publisher>
+      <publishDate>2014-07-22</publishDate>
+      <isbn-10>1401247580</isbn-10>
+      <authors>
+        <author>Various</author>
       </authors>
       <edition>1st edition</edition>
     </book>

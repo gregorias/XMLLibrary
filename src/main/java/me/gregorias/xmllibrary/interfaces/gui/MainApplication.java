@@ -2,13 +2,13 @@ package me.gregorias.xmllibrary.interfaces.gui;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -18,10 +18,10 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import me.gregorias.xmllibrary.Main;
 import me.gregorias.xmllibrary.library.LibraryFacade;
+import me.gregorias.xmllibrary.library.jaxb.Book;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -39,8 +39,9 @@ public class MainApplication extends Application {
   private static final int LEFT_MENU_WIDTH = 160;
   private static LibraryFacade FACADE;
 
+  private BorderPane mMainPane;
+
   private HBox mTopPane;
-  private List<Node> mTopPaneNodeList;
   private Label mTopPaneMainLabel;
   private Label mTopPaneLoginInfoLabel;
   private Button mTopPaneLoginButton;
@@ -51,15 +52,15 @@ public class MainApplication extends Application {
 
   @Override
   public void start(Stage primaryStage) {
-    BorderPane borderPane = new BorderPane();
+    mMainPane = new BorderPane();
     createTopPane();
     createLeftMenu();
-    borderPane.setTop(mTopPane);
-    borderPane.setLeft(mLeftMenu);
-    borderPane.setMinSize(SCENE_WIDTH, SCENE_HEIGHT);
-    borderPane.setMaxSize(SCENE_WIDTH, SCENE_HEIGHT);
+    mMainPane.setTop(mTopPane);
+    mMainPane.setLeft(mLeftMenu);
+    mMainPane.setMinSize(SCENE_WIDTH, SCENE_HEIGHT);
+    mMainPane.setMaxSize(SCENE_WIDTH, SCENE_HEIGHT);
 
-    Scene scene = new Scene(borderPane);
+    Scene scene = new Scene(mMainPane);
     scene.getStylesheets().add(MainApplication.class.getResource(CSS_PATH).toExternalForm());
 
     primaryStage.setTitle(Main.APPLICATION_NAME);
@@ -87,7 +88,7 @@ public class MainApplication extends Application {
       } finally {
         FACADE.releaseLock();
       }
-      Platform.runLater(() -> drawScene());
+      Platform.runLater(MainApplication.this::drawScene);
     }
   }
 
@@ -96,12 +97,11 @@ public class MainApplication extends Application {
     textTitle.setFont(Font.font("Arial", FontWeight.BOLD, 14));
     vbox.getChildren().add(textTitle);
 
-    for (int index = 0; index < options.length; index++) {
-      options[index].getStyleClass().add("option");
-      vbox.getChildren().add(options[index]);
+    for (Hyperlink option : options) {
+      option.getStyleClass().add("option");
+      vbox.getChildren().add(option);
     }
   }
-
 
   private void createLeftMenu() {
     mLeftMenu = new VBox();
@@ -113,8 +113,6 @@ public class MainApplication extends Application {
   private void createTopPane() {
     mTopPane = new HBox();
     mTopPane.setId("top-pane");
-
-    mTopPaneNodeList = new ArrayList<>();
 
     mTopPaneMainLabel = new Label(Main.APPLICATION_NAME);
     mTopPaneMainLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
@@ -136,7 +134,18 @@ public class MainApplication extends Application {
     RegisterRequestHandler registerHandler = new RegisterRequestHandler(FACADE);
     mTopPaneRegisterButton.setOnAction(registerHandler);
 
-    mTopPane.setHgrow(mTopPaneMainLabel, Priority.ALWAYS);
+    HBox.setHgrow(mTopPaneMainLabel, Priority.ALWAYS);
+  }
+
+  private void updateCenter() {
+    FACADE.acquireLock();
+    try {
+      List<Book> books = FACADE.getLibrary().getPositions().getBooks();
+      Pane bookShelf = BookPane.createBookShelfPane(books);
+      mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(bookShelf));
+    } finally {
+      FACADE.releaseLock();
+    }
   }
 
   private void updateTopPane() {
@@ -194,5 +203,6 @@ public class MainApplication extends Application {
     LOGGER.debug("drawScene()");
     updateTopPane();
     updateLeftMenu();
+    updateCenter();
   }
 }
