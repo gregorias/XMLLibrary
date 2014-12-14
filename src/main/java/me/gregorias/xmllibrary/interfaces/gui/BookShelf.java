@@ -52,6 +52,7 @@ public class BookShelf extends GridPane {
     Label statusFieldLabel = new Label(bookStatus.toString());
 
     Button rentButton = new Button("Rent this book");
+    rentButton.setOnAction(new RentBookRequestHandler(facade, book));
 
     pane.add(titleLabel, 0, 0);
     pane.add(titleFieldLabel, 1, 0);

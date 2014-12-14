@@ -20,6 +20,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +34,13 @@ import java.util.stream.Collectors;
 
 /**
  * A Facade to library data which handles synchronization and authentication.
- */
+    GregorianCalendar calendar = (GregorianCalendar) GregorianCalendar.getInstance();
+    calendar.add(GregorianCalendar.DAY_OF_WEEK, -1);
+
+    try {
+      XMLGregorianCalendar xmlYesterdayCalendar =
+          DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar);
+      return xmlYesterdayCalendar.toXMLFormat(); */
 public class LibraryFacade extends Observable {
   private static final Logger LOGGER = LoggerFactory.getLogger(LibraryFacade.class);
   private final Path mLibraryXMLPath;
@@ -42,6 +49,8 @@ public class LibraryFacade extends Observable {
   // private Document mLibraryDocument;
   private Library mLibrary;
   private Account mLoggedInAccount;
+
+  private DatatypeFactory mDatatypeFactory;
 
   public LibraryFacade(Path libraryXMLPath) {
     mLibraryXMLPath = libraryXMLPath;
@@ -116,9 +125,10 @@ public class LibraryFacade extends Observable {
   }
 
   public void initialize() throws ParserConfigurationException, SAXException, IOException,
-      JAXBException {
+      JAXBException, DatatypeConfigurationException {
     //mLibraryDocument = parseLibraryDocument();
     mLibrary = generateJAXBLibrary();
+    mDatatypeFactory = DatatypeFactory.newInstance();
   }
 
   public boolean isLoggedIn() {
@@ -178,6 +188,25 @@ public class LibraryFacade extends Observable {
     mLibrary.getAccounts().getUsers().add(user);
   }
 
+  public void rentABook(Book book) {
+    List<Item> items = getBookItems(book);
+    Optional<Item> rentableItem = items.stream().filter((item) -> !item.getStatus().equals(
+        ItemStatus.RENTED)).findAny();
+    Item bookItem = rentableItem.get();
+    HistoryItem historyItem = new HistoryItem();
+    historyItem.setRenteeId(mLoggedInAccount.getUser().getId());
+
+    GregorianCalendar calendar = (GregorianCalendar) GregorianCalendar.getInstance();
+
+    XMLGregorianCalendar today = mDatatypeFactory.newXMLGregorianCalendar(calendar);
+    historyItem.setRentedFrom(today);
+    calendar.add(Calendar.MONTH, 1);
+    XMLGregorianCalendar aMonthFromNow = mDatatypeFactory.newXMLGregorianCalendar(calendar);
+    historyItem.setRentedTo(aMonthFromNow);
+    bookItem.getHistory().getRents().add(historyItem);
+    bookItem.setStatus(ItemStatus.RENTED);
+  }
+
   public void save() throws JAXBException {
     JAXBContext jc = JAXBContext.newInstance(Library.class);
     Marshaller marshaller = jc.createMarshaller();
@@ -221,13 +250,12 @@ public class LibraryFacade extends Observable {
     }
   }
 
-  private int calculateNextFreeUserId() {
-    Set<Integer> userIds = new TreeSet<>(getSetOfAllUserIds());
-    if (userIds.size() == 0) {
+  private int calculateNextFreeId(TreeSet<Integer> ids) {
+    if (ids.size() == 0) {
       return 1;
     } else {
       int idCandidate = 1;
-      for (Integer id : userIds) {
+      for (Integer id : ids) {
         if (id > idCandidate) {
           break;
         }
@@ -235,6 +263,14 @@ public class LibraryFacade extends Observable {
       }
       return idCandidate;
     }
+  }
+
+  private int calculateNextFreeUserId() {
+    return calculateNextFreeId(new TreeSet<>(getSetOfAllUserIds()));
+  }
+
+  private int calculateNextFreeItemId() {
+    return calculateNextFreeId(new TreeSet<>(getSetOfAllItemIds()));
   }
 
   private String calculateYesterdayValidToString() {
@@ -263,6 +299,12 @@ public class LibraryFacade extends Observable {
       allIds.add(user.getId());
     }
     return allIds;
+  }
+
+  private Set<Integer> getSetOfAllItemIds() {
+    return mLibrary.getItems().getItems().stream()
+        .map((item) -> item.getItemId())
+        .collect(Collectors.<Integer>toSet());
   }
 
   /* private Document parseLibraryDocument() throws IOException, ParserConfigurationException,
