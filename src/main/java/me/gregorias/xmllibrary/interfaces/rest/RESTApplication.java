@@ -2,12 +2,12 @@ package me.gregorias.xmllibrary.interfaces.rest;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import me.gregorias.xmllibrary.library.jaxb.Library;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -21,16 +21,14 @@ import org.slf4j.LoggerFactory;
  */
 public class RESTApplication implements Runnable {
   private static final Logger LOGGER = LoggerFactory.getLogger(RESTApplication.class);
-  private final Library mLibrary;
-  private final Lock mLibraryLock;
+  private final Path mLibraryXMLPath;
   private final URI mUri;
   private final Lock mLock;
   private final Condition mShutDownCondition;
   private final AtomicBoolean mHasShutDownBeenCalled;
 
-  public RESTApplication(Library library, Lock libraryLock, URI uri) {
-    mLibrary = library;
-    mLibraryLock = libraryLock;
+  public RESTApplication(Path libraryXMLPath, URI uri) {
+    mLibraryXMLPath = libraryXMLPath;
     mUri = uri;
     mLock = new ReentrantLock();
     mShutDownCondition = mLock.newCondition();
@@ -65,6 +63,8 @@ public class RESTApplication implements Runnable {
 
   private ResourceConfig createConfig() {
     ResourceConfig config = new ResourceConfig();
+    config.register(new ShutdownResource(mLock, mShutDownCondition, mHasShutDownBeenCalled));
+    config.register(new CatalogueResource(mLibraryXMLPath));
     /*config.register(new KademliaStartResource(mKademlia));
     config.register(new GetLocalKeyResource(mKademlia));
     config.register(new FindNodesResource(mKademlia));

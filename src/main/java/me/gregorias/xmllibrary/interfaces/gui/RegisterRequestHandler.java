@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * Created by grzesiek on 12.12.14.
+ * Registration request handler.
  */
 public class RegisterRequestHandler implements EventHandler<ActionEvent> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RegisterRequestHandler.class);
@@ -64,7 +64,7 @@ public class RegisterRequestHandler implements EventHandler<ActionEvent> {
     }
     user.setName(information.mName);
 
-    DatatypeFactory factory = null;
+    DatatypeFactory factory;
     try {
       factory = DatatypeFactory.newInstance();
     } catch (DatatypeConfigurationException e) {
@@ -84,7 +84,7 @@ public class RegisterRequestHandler implements EventHandler<ActionEvent> {
 
     if (information.mPESEL.length() == 0) {
       if (information.mPassport.getId().length() == 0
-        || information.mPassport.getCountry().length() == 0) {
+          || information.mPassport.getCountry().length() == 0) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setHeaderText("Provide valid PESEL or passport.");
         alert.showAndWait();

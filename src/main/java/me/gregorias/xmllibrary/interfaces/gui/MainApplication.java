@@ -126,21 +126,23 @@ public class MainApplication extends Application {
     mLeftMenu.setMaxWidth(LEFT_MENU_WIDTH);
 
     mCatalogueOption = new Hyperlink("Catalogue");
-    mCatalogueOption.setOnAction((e) -> {selectAllBooks();
-      mCenterMode = CenterMode.CATALOGUE;
-      updateCenter();});
+    mCatalogueOption.setOnAction((event) -> {
+        selectAllBooks();
+        mCenterMode = CenterMode.CATALOGUE;
+        updateCenter();
+      });
 
     mProfileInformationOption = new Hyperlink("Profile Information");
-    mProfileInformationOption.setOnAction((e) -> {
-      mCenterMode = CenterMode.PROFILE_INFORMATION;
-      updateCenter();
-    });
+    mProfileInformationOption.setOnAction((event) -> {
+        mCenterMode = CenterMode.PROFILE_INFORMATION;
+        updateCenter();
+      });
 
     mRentedPositionsOption = new Hyperlink("Rented Positions");
-    mRentedPositionsOption.setOnAction((e) -> {
-      mCenterMode = CenterMode.RENTED_POSITIONS;
-      updateCenter();
-    });
+    mRentedPositionsOption.setOnAction((event) -> {
+        mCenterMode = CenterMode.RENTED_POSITIONS;
+        updateCenter();
+      });
   }
 
   private void createTopPane() {
@@ -215,8 +217,6 @@ public class MainApplication extends Application {
   private void updateLeftMenu() {
     FACADE.acquireLock();
     mLeftMenu.getChildren().clear();
-
-    Hyperlink profileInfoOption = new Hyperlink("Catalogue");
 
     addOptionsToLeftMenu(mLeftMenu, "Library menu",
         mCatalogueOption,

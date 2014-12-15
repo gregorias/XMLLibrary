@@ -66,10 +66,6 @@ public class LibraryFacade extends Observable {
         .findAny();
   }
 
-  public Optional<Item> getItemOfGivenStatus(Book book, List<Item> items, String status) {
-    return items.stream().filter((item) -> item.getStatus().equals(status)).findAny();
-  }
-
   public BookStatus getBookStatus(Book book) {
     List<Item> items = getBookItems(book);
     Optional<Item> availableItem = items.stream().filter((item) -> item.getStatus().equals(
@@ -207,8 +203,8 @@ public class LibraryFacade extends Observable {
     XMLGregorianCalendar today = mDatatypeFactory.newXMLGregorianCalendar(calendar);
     historyItem.setRentedFrom(today);
     calendar.add(Calendar.MONTH, 1);
-    XMLGregorianCalendar aMonthFromNow = mDatatypeFactory.newXMLGregorianCalendar(calendar);
-    historyItem.setRentedTo(aMonthFromNow);
+    XMLGregorianCalendar dayAMonthFromNow = mDatatypeFactory.newXMLGregorianCalendar(calendar);
+    historyItem.setRentedTo(dayAMonthFromNow);
     bookItem.getHistory().getRents().add(historyItem);
     bookItem.setStatus(ItemStatus.RENTED);
   }
@@ -275,10 +271,6 @@ public class LibraryFacade extends Observable {
     return calculateNextFreeId(new TreeSet<>(getSetOfAllUserIds()));
   }
 
-  private int calculateNextFreeItemId() {
-    return calculateNextFreeId(new TreeSet<>(getSetOfAllItemIds()));
-  }
-
   private String calculateYesterdayValidToString() {
     GregorianCalendar calendar = (GregorianCalendar) GregorianCalendar.getInstance();
     calendar.add(GregorianCalendar.DAY_OF_WEEK, -1);
@@ -305,12 +297,6 @@ public class LibraryFacade extends Observable {
       allIds.add(user.getId());
     }
     return allIds;
-  }
-
-  private Set<Integer> getSetOfAllItemIds() {
-    return mLibrary.getItems().getItems().stream()
-        .map((item) -> item.getItemId())
-        .collect(Collectors.<Integer>toSet());
   }
 
   /* private Document parseLibraryDocument() throws IOException, ParserConfigurationException,

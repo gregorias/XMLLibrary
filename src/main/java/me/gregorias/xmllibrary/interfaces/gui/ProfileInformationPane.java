@@ -23,7 +23,7 @@ public class ProfileInformationPane extends GridPane {
 
     Address address = user.getAddress();
     Label addressLabel = new Label("Address");
-    Label addressFieldLabel = new Label(String.format("%s %s\n%s %s\n%s",
+    Label addressFieldLabel = new Label(String.format("%s %s%n%s %s%n%s",
         address.getStreet(),
         address.getNumber(),
         address.getZipCode(),
@@ -31,7 +31,7 @@ public class ProfileInformationPane extends GridPane {
         address.getCountry()));
 
     Label accountValidToLabel = new Label("Account valid to");
-    Label accountValidToFieldLabel = new Label(user.getValidTo().toString());
+    Label accountValidToFieldLabel = new Label(user.getValidTo());
 
     add(nameLabel, 0, 0);
     add(nameFieldLabel, 1, 0);

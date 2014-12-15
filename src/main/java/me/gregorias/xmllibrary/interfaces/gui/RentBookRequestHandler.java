@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by grzesiek on 14.12.14.
+ * Rent a book request handler.
  */
 public class RentBookRequestHandler implements EventHandler<ActionEvent> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RentBookRequestHandler.class);
