@@ -13,7 +13,7 @@ def JAXB_BINDINGS_LOCATION = "resources/config/bindings.xjb"
 def MAIN_SOURCE_DIRECTORY = "src/main/java"
 
 group = 'me.gregorias'
-version = '0.0.1'
+version = '1.0.0'
 
 repositories {
   mavenCentral()
