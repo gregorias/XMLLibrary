@@ -65,13 +65,7 @@ public class RESTApplication implements Runnable {
     ResourceConfig config = new ResourceConfig();
     config.register(new ShutdownResource(mLock, mShutDownCondition, mHasShutDownBeenCalled));
     config.register(new CatalogueResource(mLibraryXMLPath));
-    /*config.register(new KademliaStartResource(mKademlia));
-    config.register(new GetLocalKeyResource(mKademlia));
-    config.register(new FindNodesResource(mKademlia));
-    config.register(new KademliaGetRoutingTableResource(mKademlia));
-    config.register(new KademliaStopResource(mKademlia));
-    config.register(new ServerShutDownResource(mLock, mShutDownCondition,
-     mHasShutDownBeenCalled));*/
+    config.register(new UserHistoryResource(mLibraryXMLPath));
     return config;
   }
 }
