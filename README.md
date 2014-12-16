@@ -12,13 +12,16 @@ To compile run:
     ./gradlew build
 
 To prepare for running:
+
     ./gradlew copyRuntimeDependencies
     cp build/libs/Project-1.0.0.jar ./
 
 To run GUI:
+
     java -jar Project-1.0.0.jar resources/config/library.xml
 
 To run REST:
+
     java -jar Project-1.0.0.jar resources/config/library.xml --rest
 
 
