@@ -3,22 +3,31 @@ package me.gregorias.xmllibrary.library;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 /**
- * Created by grzesiek on 14.12.14.
+ * Status of a book.
  */
 public class BookStatus {
   private static final Logger LOGGER = LoggerFactory.getLogger(BookStatus.class);
   private final Status mStatus;
   private final String mRentDuration;
+  private final boolean mIsOverdue;
 
   public BookStatus(Status status) {
-    this(status, "");
+    this(status, null);
   }
 
-  public BookStatus(Status status, String rentDuration) {
-    LOGGER.debug("BookStatus({}, {})", status, rentDuration);
+  public BookStatus(Status status, XMLGregorianCalendar rentedTo) {
+    LOGGER.debug("BookStatus({}, {})", status, rentedTo);
     mStatus = status;
-    mRentDuration = rentDuration;
+    if (rentedTo != null) {
+      mRentDuration = rentedTo.toString();
+      mIsOverdue = !Utils.isDateInFuture(rentedTo);
+    } else {
+      mRentDuration = null;
+      mIsOverdue = false;
+    }
   }
 
   public static enum Status {
@@ -30,6 +39,10 @@ public class BookStatus {
 
   public Status getStatus() {
     return mStatus;
+  }
+
+  public boolean isOverdue() {
+    return mIsOverdue;
   }
 
   public boolean isRentable() {
@@ -44,7 +57,11 @@ public class BookStatus {
       case IN_STORE:
         return "in store";
       case RENTED:
-        return "rented to " + mRentDuration;
+        if (isOverdue()) {
+          return "overdue since " + mRentDuration;
+        } else {
+          return "rented to " + mRentDuration;
+        }
       default:
         return "unavailable";
     }

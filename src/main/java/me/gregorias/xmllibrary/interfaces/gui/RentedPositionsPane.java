@@ -32,7 +32,7 @@ public class RentedPositionsPane extends VBox {
       facade.releaseLock();
     }
 
-    getStyleClass().addAll("pane", "rentedpositions");
+    getStyleClass().addAll("toplist", "rentedpositions");
   }
 
   private void addItem(LibraryFacade facade, Item item) {

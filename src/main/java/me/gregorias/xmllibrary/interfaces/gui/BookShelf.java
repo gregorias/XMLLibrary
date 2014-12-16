@@ -69,13 +69,15 @@ public class BookShelf extends GridPane {
     pane.add(statusLabel, 0, 6);
     pane.add(statusFieldLabel, 1, 6);
 
-    if (facade.isLoggedIn() && bookStatus.isRentable() && !facade.isBookRentedByUser(
-        facade.getCurrentLoggedInAccount().getUser(), book)) {
+    if (facade.isLoggedIn()
+        && facade.getCurrentLoggedInAccount().isNormalUser()
+        && bookStatus.isRentable()
+        && !facade.isBookRentedByUser(facade.getCurrentLoggedInAccount().getUser(), book)) {
       pane.add(rentButton, 0, 7, 2, 1);
     }
 
 
-    pane.getStyleClass().add("bookpane");
+    pane.getStyleClass().addAll("listitem", "bookpane");
 
     return pane;
   }
@@ -86,7 +88,7 @@ public class BookShelf extends GridPane {
     for (Book book : books) {
       bookShelf.getChildren().add(createBookPane(facade, book));
     }
-    bookShelf.getStyleClass().add("bookshelf");
+    bookShelf.getStyleClass().add("toplist");
     return bookShelf;
   }
 

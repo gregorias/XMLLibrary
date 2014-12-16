@@ -43,6 +43,8 @@ public class MainApplication extends Application {
   private Hyperlink mProfileInformationOption;
   private Hyperlink mRentedPositionsOption;
 
+  private Hyperlink mItemsOption;
+
   private BorderPane mMainPane;
 
   private HBox mTopPane;
@@ -91,7 +93,8 @@ public class MainApplication extends Application {
   private static enum CenterMode {
     CATALOGUE,
     PROFILE_INFORMATION,
-    RENTED_POSITIONS
+    RENTED_POSITIONS,
+    ALL_ITEMS,
   }
 
   private class LibraryObserver implements Observer {
@@ -143,6 +146,12 @@ public class MainApplication extends Application {
         mCenterMode = CenterMode.RENTED_POSITIONS;
         updateCenter();
       });
+
+    mItemsOption = new Hyperlink("All Items");
+    mItemsOption.setOnAction((event) -> {
+        mCenterMode = CenterMode.ALL_ITEMS;
+        updateCenter();
+      });
   }
 
   private void createTopPane() {
@@ -180,6 +189,9 @@ public class MainApplication extends Application {
         mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(bookShelf));
       } else if (mCenterMode.equals(CenterMode.PROFILE_INFORMATION)) {
         mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(new ProfileInformationPane(FACADE)));
+      } else if (mCenterMode.equals(CenterMode.ALL_ITEMS)) {
+        mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(
+            new ItemsPane(FACADE, FACADE.joinAllItemsWithData())));
       } else {
         mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(new RentedPositionsPane(FACADE)));
       }
@@ -225,7 +237,7 @@ public class MainApplication extends Application {
       if (FACADE.isLoggedIn()) {
         if (FACADE.getCurrentLoggedInAccount().isLibrarian()) {
           addOptionsToLeftMenu(mLeftMenu, "Librarian Toolbox",
-              new Hyperlink("Overdue rents"),
+              mItemsOption,
               new Hyperlink("Manage users"),
               new Hyperlink("Add positions"));
         } else {

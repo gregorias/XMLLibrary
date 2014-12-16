@@ -20,6 +20,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedList;
@@ -66,6 +67,12 @@ public class LibraryFacade extends Observable {
         .findAny();
   }
 
+  public Optional<User> findUser(int id) {
+    return mLibrary.getAccounts().getUsers().stream()
+        .filter((user) -> user.getId() == id)
+        .findAny();
+  }
+
   public BookStatus getBookStatus(Book book) {
     List<Item> items = getBookItems(book);
     Optional<Item> availableItem = items.stream().filter((item) -> item.getStatus().equals(
@@ -85,8 +92,7 @@ public class LibraryFacade extends Observable {
     Optional<Item> rentedItem = items.stream().findFirst();
     if (rentedItem.isPresent()) {
       LinkedList<HistoryItem> rents = new LinkedList<>(rentedItem.get().getHistory().getRents());
-      rents.getLast().getRentedTo();
-      return new BookStatus(BookStatus.Status.RENTED, rents.getLast().getRentedTo().toString());
+      return new BookStatus(BookStatus.Status.RENTED, rents.getLast().getRentedTo());
     } else {
       return new BookStatus(BookStatus.Status.UNAVAILABLE);
     }
@@ -120,6 +126,10 @@ public class LibraryFacade extends Observable {
   }
 
   public boolean isItemRentedByUser(User user, Item item) {
+    if (item.getStatus() != ItemStatus.RENTED) {
+      return false;
+    }
+
     long count = item.getHistory().getRents().stream()
         .filter((historyItem) -> historyItem.getRenteeId() == user.getId())
         .filter((historyItem) -> historyItem.getReturnDate() == null).count();
@@ -142,6 +152,26 @@ public class LibraryFacade extends Observable {
     }
   }
 
+  public List<BookItemUser> joinAllItemsWithData() {
+    List<BookItemUser> bookItemUserList = new ArrayList<>();
+    List<Item> items = mLibrary.getItems().getItems();
+    for (Item item : items) {
+      Optional<Book> optionalBook = mLibrary.getPositions().getBooks().stream()
+          .filter((book) -> book.getIsbn10().equals(item.getIsbn10())).findAny();
+
+      User user = null;
+
+      if (item.getStatus().equals(ItemStatus.RENTED)) {
+        HistoryItem lastRent = new LinkedList<>(item.getHistory().getRents()).getLast();
+        int renteeId = lastRent.getRenteeId();
+        Optional<User> optionalUser = findUser(renteeId);
+        user = optionalUser.get();
+      }
+      bookItemUserList.add(new BookItemUser(optionalBook.get(), item, user));
+    }
+    return bookItemUserList;
+  }
+
   public void loginAsLibrarian() {
     mLibraryLock.lock();
     try {
@@ -160,11 +190,10 @@ public class LibraryFacade extends Observable {
       if (mLoggedInAccount != null) {
         throw new IllegalStateException("Already logged in.");
       }
-      for (User user : mLibrary.getAccounts().getUsers()) {
-        if (user.getId() == id) {
-          mLoggedInAccount = new Account(user);
-          return true;
-        }
+      Optional<User> optionalUser = findUser(id);
+      if (optionalUser.isPresent()) {
+        mLoggedInAccount = new Account(optionalUser.get());
+        return true;
       }
     } finally {
       mLibraryLock.unlock();
@@ -207,6 +236,12 @@ public class LibraryFacade extends Observable {
     historyItem.setRentedTo(dayAMonthFromNow);
     bookItem.getHistory().getRents().add(historyItem);
     bookItem.setStatus(ItemStatus.RENTED);
+  }
+
+  public void returnItem(Item item) {
+    HistoryItem historyItem = new LinkedList<>(item.getHistory().getRents()).getLast();
+    historyItem.setRentedTo(Utils.getTodayDate());
+    item.setStatus(ItemStatus.IN_STORE);
   }
 
   public void save() throws JAXBException {

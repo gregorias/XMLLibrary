@@ -32,6 +32,9 @@ import java.net.URL;
 /**
  * Book Catalogue resource which allows querying via XPATH.
  */
+//TODO historia, raporty
+//pozostałe menu
+//
 @Path("catalogue")
 public class CatalogueResource {
   private static final Logger LOGGER = LoggerFactory.getLogger(CatalogueResource.class);

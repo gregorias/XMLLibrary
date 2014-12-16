@@ -17,22 +17,22 @@
   -fx-margin: 0px 0px 0px 8px;
 }
 
-.bookshelf {
-  -fx-padding: 10px;
-}
-
-.bookpane {
-  -fx-padding: 10px;
-  -fx-border-width: 2px;
-  -fx-border-color: #000000;
-}
-
 .rentedpositionpane {
   -fx-padding: 10px;
   -fx-border-width: 2px;
   -fx-border-color: #000000;
 }
 
-.profileinfo, .pane {
+.profileinfo, .toplist {
   -fx-padding: 10px;
+}
+
+.listitem {
+  -fx-padding: 10px;
+  -fx-border-width: 2px;
+  -fx-border-color: #000000;
+}
+
+.overdue {
+  -fx-text-fill: red;
 }
