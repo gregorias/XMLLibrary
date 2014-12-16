@@ -23,7 +23,6 @@ public class RegisterDialog extends Dialog<RegisterDialog.RegistrationInformatio
   private final LabelTextFieldPair mAddressZipCodePair;
   private final LabelTextFieldPair mAddressCityPair;
   private final LabelTextFieldPair mAddressCountryPair;
-  /* TODO Address */
 
   public RegisterDialog() {
     final DialogPane dialogPane = getDialogPane();

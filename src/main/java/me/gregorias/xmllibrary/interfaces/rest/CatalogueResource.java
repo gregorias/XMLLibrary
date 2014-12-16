@@ -76,7 +76,6 @@ public class CatalogueResource {
 
   private static Transformer createXsltTransformer(String xsltSpec)
       throws TransformerConfigurationException {
-    LOGGER.debug("createXsltTransformer({})", xsltSpec);
     StreamSource xsltSource = new StreamSource(new StringReader(xsltSpec));
     Transformer transformer = TransformerFactory.newInstance().newTransformer(xsltSource);
     transformer.setOutputProperty(OutputKeys.INDENT, "yes");

@@ -61,6 +61,10 @@ public class LibraryFacade extends Observable {
     mLibraryLock.lock();
   }
 
+  public void deleteUser(User user) {
+    mLibrary.getAccounts().getUsers().remove(user);
+  }
+
   public Optional<Book> findBook(String isbn10) {
     return mLibrary.getPositions().getBooks().stream()
         .filter((book) -> book.getIsbn10().equals(isbn10))
@@ -96,6 +100,10 @@ public class LibraryFacade extends Observable {
     } else {
       return new BookStatus(BookStatus.Status.UNAVAILABLE);
     }
+  }
+
+  public List<User> getAllUsers() {
+    return mLibrary.getAccounts().getUsers();
   }
 
   public List<Item> getBookItems(Book book) {

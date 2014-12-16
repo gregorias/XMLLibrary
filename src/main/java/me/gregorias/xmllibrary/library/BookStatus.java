@@ -19,7 +19,6 @@ public class BookStatus {
   }
 
   public BookStatus(Status status, XMLGregorianCalendar rentedTo) {
-    LOGGER.debug("BookStatus({}, {})", status, rentedTo);
     mStatus = status;
     if (rentedTo != null) {
       mRentDuration = rentedTo.toString();

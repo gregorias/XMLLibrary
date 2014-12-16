@@ -44,6 +44,8 @@ public class MainApplication extends Application {
   private Hyperlink mRentedPositionsOption;
 
   private Hyperlink mItemsOption;
+  private Hyperlink mUsersOption;
+  private Hyperlink mMergeOption;
 
   private BorderPane mMainPane;
 
@@ -95,6 +97,7 @@ public class MainApplication extends Application {
     PROFILE_INFORMATION,
     RENTED_POSITIONS,
     ALL_ITEMS,
+    MANAGE_USERS
   }
 
   private class LibraryObserver implements Observer {
@@ -152,6 +155,18 @@ public class MainApplication extends Application {
         mCenterMode = CenterMode.ALL_ITEMS;
         updateCenter();
       });
+
+    mUsersOption = new Hyperlink("Manage Users");
+    mUsersOption.setOnAction((event) -> {
+        mCenterMode = CenterMode.MANAGE_USERS;
+        updateCenter();
+      });
+
+    mMergeOption = new Hyperlink("Add books and items.");
+    mMergeOption.setOnAction((event) -> {
+        mCenterMode = CenterMode.MANAGE_USERS;
+        updateCenter();
+      });
   }
 
   private void createTopPane() {
@@ -192,6 +207,10 @@ public class MainApplication extends Application {
       } else if (mCenterMode.equals(CenterMode.ALL_ITEMS)) {
         mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(
             new ItemsPane(FACADE, FACADE.joinAllItemsWithData())));
+      } else if (mCenterMode.equals(CenterMode.MANAGE_USERS)) {
+        mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(
+            new ManageUsersPane(FACADE, FACADE.getAllUsers())));
+
       } else {
         mMainPane.setCenter(Utils.wrapNodeInVerticalScrollPane(new RentedPositionsPane(FACADE)));
       }
@@ -238,8 +257,8 @@ public class MainApplication extends Application {
         if (FACADE.getCurrentLoggedInAccount().isLibrarian()) {
           addOptionsToLeftMenu(mLeftMenu, "Librarian Toolbox",
               mItemsOption,
-              new Hyperlink("Manage users"),
-              new Hyperlink("Add positions"));
+              mUsersOption,
+              mMergeOption);
         } else {
           addOptionsToLeftMenu(mLeftMenu, "Profile",
               mProfileInformationOption,
