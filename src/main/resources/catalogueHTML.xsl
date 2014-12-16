@@ -3,7 +3,12 @@
   <xsl:template match="/">
 <html>
 <body style="padding: 10px;">
-  <xsl:for-each select="%s">
+  <xsl:apply-templates select="%s" />
+</body>
+</html>
+  </xsl:template>
+
+  <xsl:template match="//book">
     <div style="border-style: solid;
         border-width: 2px;
         border-color: #000000;
@@ -33,23 +38,17 @@
         <h3> isbn10 </h3>
         <xsl:value-of select="isbn-10"/>
       </div>
-      <xsl:variable name="currentISBN" select="isbn-10" />
       <div>
         <h3> Items </h3>
         <ul>
-          <xsl:for-each select="//item[isbn-10=$currentISBN]">
-            <li> <xsl:apply-templates select="."/> </li>
-          </xsl:for-each>
+          <xsl:apply-templates select="//item[isbn-10=current()/isbn-10]" />
         </ul>
       </div>
     </div>
-  </xsl:for-each>
-</body>
-</html>
   </xsl:template>
+
   <xsl:template match="item">
-    <h4> Status </h4>
-    <xsl:value-of select="status" />
+    <li> <h4> Status </h4> <xsl:value-of select="status" /> </li>
   </xsl:template>
 
 </xsl:stylesheet>
