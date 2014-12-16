@@ -23,12 +23,14 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -218,6 +220,39 @@ public class LibraryFacade extends Observable {
     }
   }
 
+  public boolean mergeLibrary(Path sourceLibraryPath) {
+    LibraryFacade sourceFacade = new LibraryFacade(sourceLibraryPath);
+    try {
+      sourceFacade.initialize();
+    } catch (ParserConfigurationException | SAXException | JAXBException | IOException
+        | DatatypeConfigurationException e) {
+      return false;
+    }
+    Library sourceLibrary = sourceFacade.getLibrary();
+
+    Set<String> availableISBNs = new HashSet<>();
+    mLibrary.getPositions().getBooks().stream().forEach((book) ->
+        availableISBNs.add(book.getIsbn10()));
+
+    sourceLibrary.getPositions().getBooks().stream()
+        .forEach((book) -> {
+            if (!availableISBNs.contains(book.getIsbn10())) {
+              mLibrary.getPositions().getBooks().add(book);
+            }
+          });
+
+    AtomicInteger maxItemId = new AtomicInteger(calculateMaxItemId() + 1);
+
+    sourceLibrary.getItems().getItems()
+        .forEach((item) -> {
+            item.setHistory(new Item.History());
+            item.setStatus(ItemStatus.IN_STORE);
+            item.setItemId(maxItemId.getAndIncrement());
+            mLibrary.getItems().getItems().add(item);
+          });
+    return true;
+  }
+
   public void registerNewUser(User user) {
     int newId = calculateNextFreeUserId();
     user.setId(newId);
@@ -308,6 +343,12 @@ public class LibraryFacade extends Observable {
       }
       return idCandidate;
     }
+  }
+
+  private int calculateMaxItemId() {
+    return mLibrary.getItems().getItems().stream()
+        .map((item) -> { return item.getItemId();  })
+        .max(Integer::compare).get();
   }
 
   private int calculateNextFreeUserId() {

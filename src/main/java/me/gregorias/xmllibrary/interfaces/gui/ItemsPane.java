@@ -51,6 +51,7 @@ public class ItemsPane extends VBox {
       addFields(pane, 4, "User", triple.mUser.getName());
     }
     HBox buttonBar = new HBox();
+    buttonBar.setSpacing(10);
     buttonBar.setAlignment(Pos.CENTER_LEFT);
     if (!triple.getBookStatus().isRentable()) {
       Button returnButton = new Button("Return Book");
@@ -60,14 +61,23 @@ public class ItemsPane extends VBox {
           mFacade.notifyObservers();
         });
       buttonBar.getChildren().add(returnButton);
-    } else if (triple.mItem.getStatus() == ItemStatus.IN_STORE) {
-      Button availableButton = new Button("Mark as available");
-      availableButton.setOnAction((event) -> {
-          triple.mItem.setStatus(ItemStatus.AVAILABLE);
+    } else {
+      if (triple.mItem.getStatus() == ItemStatus.IN_STORE) {
+        Button availableButton = new Button("Mark as available");
+        availableButton.setOnAction((event) -> {
+            triple.mItem.setStatus(ItemStatus.AVAILABLE);
+            mFacade.setChanged();
+            mFacade.notifyObservers();
+          });
+        buttonBar.getChildren().add(availableButton);
+      }
+      Button removeButton = new Button("Remove item");
+      removeButton.setOnAction((event) -> {
+          mFacade.getLibrary().getItems().getItems().remove(triple.mItem);
           mFacade.setChanged();
           mFacade.notifyObservers();
         });
-      buttonBar.getChildren().add(availableButton);
+      buttonBar.getChildren().add(removeButton);
     }
 
     pane.add(buttonBar, 0, 5, 2, 1);

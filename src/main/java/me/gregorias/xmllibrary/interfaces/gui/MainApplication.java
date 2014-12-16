@@ -3,6 +3,7 @@ package me.gregorias.xmllibrary.interfaces.gui;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -15,6 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import me.gregorias.xmllibrary.Main;
 import me.gregorias.xmllibrary.library.LibraryFacade;
@@ -22,6 +24,7 @@ import me.gregorias.xmllibrary.library.jaxb.Book;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -38,6 +41,8 @@ public class MainApplication extends Application {
   private static final int SCENE_HEIGHT = 600;
   private static final int LEFT_MENU_WIDTH = 160;
   private static LibraryFacade FACADE;
+
+  private Stage mPrimaryStage;
 
   private Hyperlink mCatalogueOption;
   private Hyperlink mProfileInformationOption;
@@ -64,6 +69,7 @@ public class MainApplication extends Application {
 
   @Override
   public void start(Stage primaryStage) {
+    mPrimaryStage = primaryStage;
     selectAllBooks();
 
     mMainPane = new BorderPane();
@@ -162,10 +168,21 @@ public class MainApplication extends Application {
         updateCenter();
       });
 
-    mMergeOption = new Hyperlink("Add books and items.");
+    mMergeOption = new Hyperlink("Add books");
     mMergeOption.setOnAction((event) -> {
-        mCenterMode = CenterMode.MANAGE_USERS;
-        updateCenter();
+        FileChooser chooser = new FileChooser();
+        File file = chooser.showOpenDialog(mPrimaryStage);
+        if (file != null) {
+          boolean hasSucceeded = FACADE.mergeLibrary(file.toPath());
+          if (!hasSucceeded) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Could not merge.");
+            alert.showAndWait();
+          } else {
+            FACADE.setChanged();
+            FACADE.notifyObservers();
+          }
+        }
       });
   }
 
@@ -249,9 +266,7 @@ public class MainApplication extends Application {
     FACADE.acquireLock();
     mLeftMenu.getChildren().clear();
 
-    addOptionsToLeftMenu(mLeftMenu, "Library menu",
-        mCatalogueOption,
-        new Hyperlink("Find books"));
+    addOptionsToLeftMenu(mLeftMenu, "Library menu", mCatalogueOption);
     try {
       if (FACADE.isLoggedIn()) {
         if (FACADE.getCurrentLoggedInAccount().isLibrarian()) {
