@@ -13,8 +13,8 @@ import java.nio.file.Path;
 /**
  * Main entry point to application. Expects first argument to point to XML data file.
  *
- * If only one argument is provided GUI is started {@see MainApplication}.
- * Otherwise REST interface {@see RESTApplication}.
+ * If only one argument is provided GUI is started @see MainApplication.
+ * Otherwise REST interface @see RESTApplication.
  */
 public class Main {
   public static final String APPLICATION_NAME = "XMLLibrary";
